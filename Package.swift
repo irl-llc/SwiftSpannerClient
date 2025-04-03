@@ -1,24 +1,37 @@
-// swift-tools-version: 6.1
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.0
 
 import PackageDescription
 
 let package = Package(
     name: "SwiftSpannerClient",
+    platforms: [
+      .macOS(.v13),
+      .iOS(.v13)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "SwiftSpannerClient",
-            targets: ["SwiftSpannerClient"]),
+            targets: ["SwiftSpannerClient"])
+    ],
+    dependencies: [
+      .package(url: "https://github.com/apple/swift-log.git", from: "1.6.1"),
+      .package(url: "https://github.com/irl-llc/SwiftTestContainers.git", from: "0.1.0")
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "SwiftSpannerClient"),
+            name: "SwiftSpannerClient",
+            dependencies: [
+              .product(name: "Logging", package: "swift-log"),
+              .product(name: "SwiftTestContainers", package: "SwiftTestContainers")
+            ]
+        ),
         .testTarget(
             name: "SwiftSpannerClientTests",
-            dependencies: ["SwiftSpannerClient"]
-        ),
+            dependencies: ["SwiftSpannerClient"],
+            resources: [
+              .process("sample_users.sql"),
+              .process("user_table.ddl")
+            ]
+        )
     ]
 )

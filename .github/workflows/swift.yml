@@ -1,0 +1,41 @@
+# This workflow will build a Swift project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+
+name: Swift
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6"
+    - name: Restore cached build directory
+      id: cached-build-dir-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-build
+    - name: Setup Testcontainers Cloud Client
+      uses: atomicjar/testcontainers-cloud-setup-action@main
+      with:
+        token: ${{ secrets.TC_CLOUD_TOKEN }}
+    - name: Build
+      run: swift build -v
+    - name: Save cached build directory
+      id: cached-build-dir-save
+      uses: actions/cache/save@v4
+      with:
+        path: .build
+        key: ${{ steps.cached-build-dir-restore.outputs.cache-primary-key }}
+    - name: Run tests
+      run: swift test -v
